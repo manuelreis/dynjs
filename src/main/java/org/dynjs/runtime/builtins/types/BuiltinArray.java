@@ -86,6 +86,20 @@ public class BuiltinArray extends AbstractBuiltinType {
         if (args.length == 1 && args[0] instanceof Number) {
             arraySelf.defineOwnProperty(context, "length",
                     PropertyDescriptor.newDataPropertyDescriptor(args[0], true, false, false), false);
+            
+            System.out.println("antes");
+            
+            // instanciar o array
+            Object[] ArrayDim = new Object[(int) (long)args[0]];
+            ArrayDim[0] = 4;
+            
+            arraySelf.defineOwnProperty(context, "serializedArray",
+                    PropertyDescriptor.newDataPropertyDescriptor(ArrayDim, true, false, false), true);
+            
+            System.out.println("depois");
+            Object[] arr = (Object[]) arraySelf.getOwnProperty(context, "serializedArray");
+            System.out.println("Pos 0: " + arr[0]);
+            
         } else {
             Arguments argsObj = (Arguments) context.resolve("arguments").getValue(context);
             int numArgs = (int) argsObj.get(context, "length");
