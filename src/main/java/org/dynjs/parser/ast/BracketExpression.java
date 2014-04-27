@@ -15,7 +15,9 @@
  */
 package org.dynjs.parser.ast;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import org.dynjs.parser.CodeVisitor;
 import org.dynjs.runtime.ExecutionContext;
 
@@ -29,8 +31,8 @@ import org.dynjs.runtime.ExecutionContext;
  */
 public class BracketExpression extends AbstractBinaryExpression {
 
-    public static final String MULTIDIM_ARR_FLAG = "-1";
-    public static String LinearizedIndex;
+    public static final int MULTIDIM_ARR_FLAG = -1;
+    public static Deque<Integer> MultidimensionArrayIndexs = new ArrayDeque<Integer>();
     
     public BracketExpression(Expression lhs, Expression rhs) {
         super( lhs, rhs, "[]" );
@@ -49,22 +51,21 @@ public class BracketExpression extends AbstractBinaryExpression {
         if(this.getLhs() instanceof BracketExpression) {
             System.out.println("@" + BracketExpression.class.getSimpleName() + " Multidimension array detected");            
             
-            String parsedIndex = ((IntegerNumberExpression)this.getRhs()).getText();
             Expression lh = this.getLhs();
             BracketExpression be;
+            
+            BracketExpression.MultidimensionArrayIndexs.addFirst( (int)((IntegerNumberExpression)this.getRhs()).getValue() );
             while(lh instanceof BracketExpression) {
                 be = (BracketExpression) lh;
-                parsedIndex = ((IntegerNumberExpression)be.getRhs()).getText() + "," + parsedIndex;
+                BracketExpression.MultidimensionArrayIndexs.addFirst( (int)((IntegerNumberExpression)be.getRhs()).getValue() );
                 lh = be.getLhs();
             }
             
-            BracketExpression linearizedExpr = new BracketExpression(lh, new IntegerNumberExpression(this.getPosition(), parsedIndex, 10, -1));
-            BracketExpression.LinearizedIndex = parsedIndex;
-            
-            System.out.println("@" + BracketExpression.class.getSimpleName() + " Multidimension array linearized index: " + parsedIndex);
+            BracketExpression linearizedExpr = new BracketExpression(lh, new IntegerNumberExpression(this.getPosition(), "", 10, BracketExpression.MULTIDIM_ARR_FLAG));
             
             visitor.visit( context, linearizedExpr, strict );
         } else {
+//        BracketExpression.LinearizedIndex = String.valueOf( (IntegerNumberExpression)this.getRhs().;
         visitor.visit( context, this, strict );
         }
     }

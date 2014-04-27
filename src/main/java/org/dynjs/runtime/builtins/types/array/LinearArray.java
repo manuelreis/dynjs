@@ -33,15 +33,15 @@ public class LinearArray {
 		return array;
 	}
 	
-	public Object getElement(int... args){
+	public Object getElement(Integer[] args){
 		return array[toLinearIndex(args)];
 	}
 	
-	public void setElement(Object value, int... args){
+	public void setElement(Object value, Integer[] args){
 		array[toLinearIndex(args)] = value;
 	}
 	
-	private int toLinearIndex(int [] indexs){
+	private int toLinearIndex(Integer [] indexs){
 		int index = 0;
 		int i = 0;
 		for(; i < dimensions.length - 1; i++){

@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.dynjs.exception.ThrowException;
 import org.dynjs.parser.ast.BracketExpression;
+import org.dynjs.runtime.builtins.types.array.LinearArray;
 
 public class DynObject implements JSObject, Map<String, Object> {
 
@@ -78,32 +79,50 @@ public class DynObject implements JSObject, Map<String, Object> {
     @Override
     public Object get(ExecutionContext context, String name) {
         // fita cola
-        if(BracketExpression.MULTIDIM_ARR_FLAG.equals(name)){
-            System.out.println("Multidimension array linearized Index access: " + BracketExpression.LinearizedIndex);
-        }
-        
-        // 8.12.3
-        Object d = getProperty(context, name, false);
-        if (d == Types.UNDEFINED) {
-            return Types.UNDEFINED;
-        }
-
-        PropertyDescriptor desc = (PropertyDescriptor) d;
-        if (desc.isDataDescriptor()) {
-            Object value = desc.getValue();
-            if (value == null) {
-                value = Types.UNDEFINED;
+        if( name.equals(String.valueOf(BracketExpression.MULTIDIM_ARR_FLAG)) ){
+            Integer[] indxs = new Integer[BracketExpression.MultidimensionArrayIndexs.size()];//(Integer[])BracketExpression.MultidimensionArrayIndexs.toArray();
+            System.out.println("Multidimension array linearized Index access: " + BracketExpression.MultidimensionArrayIndexs);
+            
+            int indexCount = BracketExpression.MultidimensionArrayIndexs.size();
+            for(int i = 0; i < indexCount; i++) {
+                indxs[i] = BracketExpression.MultidimensionArrayIndexs.pop();
+                System.out.println("Index: " + indxs[i]);
             }
-            return value;
-        }
+            
+            BracketExpression.MultidimensionArrayIndexs.clear();
+            
+            Object sa = getProperty(context, "serializedArray", false);
+            if (sa == Types.UNDEFINED) {
+                return Types.UNDEFINED;
+            } else {
+                LinearArray la = (LinearArray) ((PropertyDescriptor) sa).getValue();
+                return la.getElement(indxs);
+            }
+        } else {
+        
+            // 8.12.3
+            Object d = getProperty(context, name, false);
+            if (d == Types.UNDEFINED) {
+                return Types.UNDEFINED;
+            }
 
-        Object g = desc.getGetter();
-        if (g == null || g == Types.UNDEFINED) {
-            return Types.UNDEFINED;
-        }
+            PropertyDescriptor desc = (PropertyDescriptor) d;
+            if (desc.isDataDescriptor()) {
+                Object value = desc.getValue();
+                if (value == null) {
+                    value = Types.UNDEFINED;
+                }
+                return value;
+            }
 
-        JSFunction getter = (JSFunction) g;
-        return context.call(getter, this);
+            Object g = desc.getGetter();
+            if (g == null || g == Types.UNDEFINED) {
+                return Types.UNDEFINED;
+            }
+
+            JSFunction getter = (JSFunction) g;
+            return context.call(getter, this);
+        }
     }
 
     @Override
@@ -160,8 +179,40 @@ public class DynObject implements JSObject, Map<String, Object> {
     @Override
     public void put(ExecutionContext context, final String name, final Object value, final boolean shouldThrow) {
         // fita cola
-        if(BracketExpression.MULTIDIM_ARR_FLAG.equals(name)){
-            System.out.println("Multidimension array linearized Index access: " + BracketExpression.LinearizedIndex);
+        if( name.equals(String.valueOf(BracketExpression.MULTIDIM_ARR_FLAG)) ){
+            try {
+            Integer[] indxs = new Integer[BracketExpression.MultidimensionArrayIndexs.size()]; // (Integer[])BracketExpression.MultidimensionArrayIndexs.toArray();
+            System.out.println("Multidimension array linearized Index access: " + BracketExpression.MultidimensionArrayIndexs);
+            
+            int indexCount = BracketExpression.MultidimensionArrayIndexs.size();
+            for(int i = 0; i < indexCount; i++) {
+                indxs[i] = BracketExpression.MultidimensionArrayIndexs.pop();
+                System.out.println("Index: " + indxs[i]);
+            }
+            
+            BracketExpression.MultidimensionArrayIndexs.clear();
+            
+            Object sa = getProperty(context, "serializedArray", false);
+            if (sa == Types.UNDEFINED) {
+                return;
+            } else {
+                LinearArray la = (LinearArray) ((PropertyDescriptor) sa).getValue();
+                la.setElement(value, indxs);
+                return;
+            }
+            } catch(Exception e) { e.printStackTrace(); }
+            
+            
+            
+            
+//            System.out.println("Multidimension array linearized Index access: " + BracketExpression.MultidimensionArrayIndexs);
+//            System.err.println("Trying to put: " + value.getClass());
+//            
+//            for(Object dim : BracketExpression.MultidimensionArrayIndexs) {
+//                System.out.println("Index: " + (long)dim);
+//            }
+//            
+//            BracketExpression.MultidimensionArrayIndexs.clear();
         }
         
         // 8.12.5
