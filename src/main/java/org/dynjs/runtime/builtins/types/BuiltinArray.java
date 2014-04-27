@@ -9,6 +9,7 @@ import org.dynjs.runtime.JSObject;
 import org.dynjs.runtime.PropertyDescriptor;
 import org.dynjs.runtime.Types;
 import org.dynjs.runtime.builtins.types.array.IsArray;
+import org.dynjs.runtime.builtins.types.array.LinearArray;
 import org.dynjs.runtime.builtins.types.array.prototype.Concat;
 import org.dynjs.runtime.builtins.types.array.prototype.Every;
 import org.dynjs.runtime.builtins.types.array.prototype.Filter;
@@ -30,6 +31,9 @@ import org.dynjs.runtime.builtins.types.array.prototype.Splice;
 import org.dynjs.runtime.builtins.types.array.prototype.ToLocaleString;
 import org.dynjs.runtime.builtins.types.array.prototype.ToString;
 import org.dynjs.runtime.builtins.types.array.prototype.Unshift;
+//import org.fest.util.Arrays;
+import java.util.Arrays;
+//import com.kenai.jffi.Array;
 
 public class BuiltinArray extends AbstractBuiltinType {
 
@@ -83,39 +87,25 @@ public class BuiltinArray extends AbstractBuiltinType {
         } else {
             arraySelf = (DynArray) self;
         }
-        if (args.length == 1 && args[0] instanceof Number) {
-            arraySelf.defineOwnProperty(context, "length",
+        	arraySelf.defineOwnProperty(context, "length",
                     PropertyDescriptor.newDataPropertyDescriptor(args[0], true, false, false), false);
             
-            System.out.println("antes");
+
+            Integer[] dimensions = new Integer[args.length];
+            for(int i = 0; i < args.length; i++)
+            	dimensions[i] = (int) (long) args[i];
             
-            // instanciar o array
-            Object[] ArrayDim = new Object[(int) (long)args[0]];
-            ArrayDim[0] = 4;
-            
+            LinearArray linearArray = new LinearArray(dimensions);
+            linearArray.setElement(1233433, 0,0,0,0 );
             arraySelf.defineOwnProperty(context, "serializedArray",
-                    PropertyDescriptor.newDataPropertyDescriptor(ArrayDim, true, false, false), true);
+                    PropertyDescriptor.newDataPropertyDescriptor(linearArray, true, false, false), true);
             
-            System.out.println("depois");
-            Object[] arr = (Object[]) arraySelf.getOwnProperty(context, "serializedArray");
-            System.out.println("Pos 0: " + arr[0]);
             
-        } else {
-            Arguments argsObj = (Arguments) context.resolve("arguments").getValue(context);
-            int numArgs = (int) argsObj.get(context, "length");
-            if (numArgs == 0 ) {
-                arraySelf.defineOwnProperty(context, "length",
-                        PropertyDescriptor.newDataPropertyDescriptor(0l, true, false, false), false);
-            } else {
-                arraySelf.defineOwnProperty(context, "length",
-                        PropertyDescriptor.newDataPropertyDescriptor((long) args.length, true, false, false), false);
-                for (int i = 0; i < args.length; ++i) {
-                    final int finalI = i;
-                    arraySelf.defineOwnProperty(context, "" + i,
-                            PropertyDescriptor.newDataPropertyDescriptor(args[finalI], true, true, true), false);
-                }
-            }
-        }
+          System.out.println("depois");
+            LinearArray arr = (LinearArray) ((PropertyDescriptor) arraySelf.getOwnProperty(context, "serializedArray")).getValue();
+            
+            System.out.println("Pos 0: " + arr.getElement(0,0,0,0));
+       
         return arraySelf;
     }
 
