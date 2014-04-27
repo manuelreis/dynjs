@@ -31,9 +31,6 @@ import org.dynjs.runtime.builtins.types.array.prototype.Splice;
 import org.dynjs.runtime.builtins.types.array.prototype.ToLocaleString;
 import org.dynjs.runtime.builtins.types.array.prototype.ToString;
 import org.dynjs.runtime.builtins.types.array.prototype.Unshift;
-//import org.fest.util.Arrays;
-import java.util.Arrays;
-//import com.kenai.jffi.Array;
 
 public class BuiltinArray extends AbstractBuiltinType {
 
@@ -87,24 +84,22 @@ public class BuiltinArray extends AbstractBuiltinType {
         } else {
             arraySelf = (DynArray) self;
         }
-        	arraySelf.defineOwnProperty(context, "length",
-                    PropertyDescriptor.newDataPropertyDescriptor(args[0], true, false, false), false);
-            
+        
+        arraySelf.defineOwnProperty(context, "length", PropertyDescriptor.newDataPropertyDescriptor(args[0], true, false, false), false);
 
-            Integer[] dimensions = new Integer[args.length];
-            for(int i = 0; i < args.length; i++)
-            	dimensions[i] = (int) (long) args[i];
-            
-            LinearArray linearArray = new LinearArray(dimensions);
-            linearArray.setElement(1233433, 0,0,0,0 );
-            arraySelf.defineOwnProperty(context, "serializedArray",
-                    PropertyDescriptor.newDataPropertyDescriptor(linearArray, true, false, false), true);
-            
-            
-          System.out.println("depois");
-            LinearArray arr = (LinearArray) ((PropertyDescriptor) arraySelf.getOwnProperty(context, "serializedArray")).getValue();
-            
-            System.out.println("Pos 0: " + arr.getElement(0,0,0,0));
+        Integer[] dimensions = new Integer[args.length];
+        for(int i = 0; i < args.length; i++)
+            dimensions[i] = (int) (long) args[i];
+
+        LinearArray linearArray = new LinearArray(dimensions);
+//            linearArray.setElement(1233433, 0,0,0,0 );
+
+        arraySelf.defineOwnProperty(context, "serializedArray", PropertyDescriptor.newDataPropertyDescriptor(linearArray, true, false, false), true);
+
+//          System.out.println("depois");
+//            LinearArray arr = (LinearArray) ((PropertyDescriptor) arraySelf.getOwnProperty(context, "serializedArray")).getValue();
+//            
+//            System.out.println("Pos 0: " + arr.getElement(0,0,0,0));
        
         return arraySelf;
     }
