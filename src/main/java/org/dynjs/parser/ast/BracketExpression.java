@@ -15,6 +15,7 @@
  */
 package org.dynjs.parser.ast;
 
+import java.util.ArrayList;
 import org.dynjs.parser.CodeVisitor;
 import org.dynjs.runtime.ExecutionContext;
 
@@ -28,6 +29,9 @@ import org.dynjs.runtime.ExecutionContext;
  */
 public class BracketExpression extends AbstractBinaryExpression {
 
+    public static final String MULTIDIM_ARR_FLAG = "-1";
+    public static String LinearizedIndex;
+    
     public BracketExpression(Expression lhs, Expression rhs) {
         super( lhs, rhs, "[]" );
     }
@@ -42,6 +46,26 @@ public class BracketExpression extends AbstractBinaryExpression {
 
     @Override
     public void accept(ExecutionContext context, CodeVisitor visitor, boolean strict) {
+        if(this.getLhs() instanceof BracketExpression) {
+            System.out.println("@" + BracketExpression.class.getSimpleName() + " Multidimension array detected");            
+            
+            String parsedIndex = ((IntegerNumberExpression)this.getRhs()).getText();
+            Expression lh = this.getLhs();
+            BracketExpression be;
+            while(lh instanceof BracketExpression) {
+                be = (BracketExpression) lh;
+                parsedIndex = ((IntegerNumberExpression)be.getRhs()).getText() + "," + parsedIndex;
+                lh = be.getLhs();
+            }
+            
+            BracketExpression linearizedExpr = new BracketExpression(lh, new IntegerNumberExpression(this.getPosition(), parsedIndex, 10, -1));
+            BracketExpression.LinearizedIndex = parsedIndex;
+            
+            System.out.println("@" + BracketExpression.class.getSimpleName() + " Multidimension array linearized index: " + parsedIndex);
+            
+            visitor.visit( context, linearizedExpr, strict );
+        } else {
         visitor.visit( context, this, strict );
+        }
     }
 }

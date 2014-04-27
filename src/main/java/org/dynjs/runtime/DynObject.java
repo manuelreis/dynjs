@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.dynjs.exception.ThrowException;
+import org.dynjs.parser.ast.BracketExpression;
 
 public class DynObject implements JSObject, Map<String, Object> {
 
@@ -76,6 +77,11 @@ public class DynObject implements JSObject, Map<String, Object> {
 
     @Override
     public Object get(ExecutionContext context, String name) {
+        // fita cola
+        if(BracketExpression.MULTIDIM_ARR_FLAG.equals(name)){
+            System.out.println("Multidimension array linearized Index access: " + BracketExpression.LinearizedIndex);
+        }
+        
         // 8.12.3
         Object d = getProperty(context, name, false);
         if (d == Types.UNDEFINED) {
@@ -153,6 +159,11 @@ public class DynObject implements JSObject, Map<String, Object> {
 
     @Override
     public void put(ExecutionContext context, final String name, final Object value, final boolean shouldThrow) {
+        // fita cola
+        if(BracketExpression.MULTIDIM_ARR_FLAG.equals(name)){
+            System.out.println("Multidimension array linearized Index access: " + BracketExpression.LinearizedIndex);
+        }
+        
         // 8.12.5
         // System.err.println("PUT " + name + " > " + value);
         if (!canPut(context, name)) {
