@@ -92,14 +92,8 @@ public class BuiltinArray extends AbstractBuiltinType {
             dimensions[i] = (int) (long) args[i];
 
         LinearArray linearArray = new LinearArray(dimensions);
-//            linearArray.setElement(1233433, 0,0,0,0 );
 
         arraySelf.defineOwnProperty(context, "serializedArray", PropertyDescriptor.newDataPropertyDescriptor(linearArray, true, false, false), true);
-
-//          System.out.println("depois");
-//            LinearArray arr = (LinearArray) ((PropertyDescriptor) arraySelf.getOwnProperty(context, "serializedArray")).getValue();
-//            
-//            System.out.println("Pos 0: " + arr.getElement(0,0,0,0));
        
         return arraySelf;
     }

@@ -18,8 +18,12 @@ package org.dynjs.parser.ast;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+
 import org.dynjs.parser.CodeVisitor;
+import org.dynjs.runtime.DynObject;
 import org.dynjs.runtime.ExecutionContext;
+import org.dynjs.runtime.PropertyDescriptor;
+import org.dynjs.runtime.builtins.types.array.LinearArray;
 
 /**
  * Access a property with bracket notation
@@ -31,42 +35,65 @@ import org.dynjs.runtime.ExecutionContext;
  */
 public class BracketExpression extends AbstractBinaryExpression {
 
-    public static final int MULTIDIM_ARR_FLAG = -1;
-    public static Deque<Integer> MultidimensionArrayIndexs = new ArrayDeque<Integer>();
-    
-    public BracketExpression(Expression lhs, Expression rhs) {
-        super( lhs, rhs, "[]" );
-    }
-    
-    public String toString() {
-        return getLhs() + "[" + getRhs() + "]";
-    }
-    
-    public String dump(String indent) {
-        return super.dump(indent) + getLhs().dump( indent + "  " ) + getRhs().dump( indent + "  " );
-    }
+	public static final int MULTIDIM_ARR_FLAG = -1;
+	public static Deque<Integer> MultidimensionArrayIndexs = new ArrayDeque<Integer>();
 
-    @Override
+	public BracketExpression(Expression lhs, Expression rhs) {
+		super(lhs, rhs, "[]");
+	}
+
+	public String toString() {
+		return getLhs() + "[" + getRhs() + "]";
+	}
+
+	public String dump(String indent) {
+		return super.dump(indent) + getLhs().dump(indent + "  ")
+				+ getRhs().dump(indent + "  ");
+	}
+	
+	private void addIndex(BracketExpression bracketExp, ExecutionContext context){
+		Expression exp = bracketExp.getRhs();
+		if(!(exp instanceof IntegerNumberExpression)){
+			System.out.println("@" + BracketExpression.class.getSimpleName() + " Expression is : " + exp.getClass().getSimpleName());   
+			
+			String identifier = ((IdentifierReferenceExpression) exp).getIdentifier();
+			
+			DynObject dynObj = new DynObject();// :(
+			Object identifierProperty = dynObj.getProperty(context, identifier, false);
+			int value = (int) ((PropertyDescriptor) identifierProperty).getValue();
+			
+			BracketExpression.MultidimensionArrayIndexs.addFirst(value);
+		} else {
+			BracketExpression.MultidimensionArrayIndexs.addFirst((int)((IntegerNumberExpression) exp).getValue());
+		}
+	}
+
+	@Override
     public void accept(ExecutionContext context, CodeVisitor visitor, boolean strict) {
         if(this.getLhs() instanceof BracketExpression) {
-            System.out.println("@" + BracketExpression.class.getSimpleName() + " Multidimension array detected");            
+        	try{
+        	System.out.println("@" + BracketExpression.class.getSimpleName() + " Multidimension array detected");            
             
             Expression lh = this.getLhs();
             BracketExpression be;
             
-            BracketExpression.MultidimensionArrayIndexs.addFirst( (int)((IntegerNumberExpression)this.getRhs()).getValue() );
+            addIndex(this, context);
+            
             while(lh instanceof BracketExpression) {
                 be = (BracketExpression) lh;
-                BracketExpression.MultidimensionArrayIndexs.addFirst( (int)((IntegerNumberExpression)be.getRhs()).getValue() );
+                addIndex(be, context);
                 lh = be.getLhs();
             }
             
             BracketExpression linearizedExpr = new BracketExpression(lh, new IntegerNumberExpression(this.getPosition(), "", 10, BracketExpression.MULTIDIM_ARR_FLAG));
             
             visitor.visit( context, linearizedExpr, strict );
+            
+        } catch (Exception e){
+        	e.printStackTrace();
+        }
         } else {
-//        BracketExpression.LinearizedIndex = String.valueOf( (IntegerNumberExpression)this.getRhs().;
-        visitor.visit( context, this, strict );
+        	visitor.visit( context, this, strict );
         }
     }
 }
