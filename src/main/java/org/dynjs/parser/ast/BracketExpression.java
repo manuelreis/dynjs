@@ -21,7 +21,10 @@ import java.util.Deque;
 
 import org.dynjs.parser.CodeVisitor;
 import org.dynjs.runtime.DynObject;
+import org.dynjs.runtime.EnvironmentRecord;
 import org.dynjs.runtime.ExecutionContext;
+import org.dynjs.runtime.JSObject;
+import org.dynjs.runtime.ObjectEnvironmentRecord;
 import org.dynjs.runtime.PropertyDescriptor;
 import org.dynjs.runtime.builtins.types.array.LinearArray;
 
@@ -51,17 +54,17 @@ public class BracketExpression extends AbstractBinaryExpression {
 				+ getRhs().dump(indent + "  ");
 	}
 	
+	/*
+	 *  Hand-crafted method to support non literal inside multidimensional array brackets.
+	 */
 	private void addIndex(BracketExpression bracketExp, ExecutionContext context){
 		Expression exp = bracketExp.getRhs();
 		if(!(exp instanceof IntegerNumberExpression)){
-			System.out.println("@" + BracketExpression.class.getSimpleName() + " Expression is : " + exp.getClass().getSimpleName());   
-			
 			String identifier = ((IdentifierReferenceExpression) exp).getIdentifier();
-			
-			DynObject dynObj = new DynObject();// :(
-			Object identifierProperty = dynObj.getProperty(context, identifier, false);
-			int value = (int) ((PropertyDescriptor) identifierProperty).getValue();
-			
+			EnvironmentRecord env = context.getVariableEnvironment().getRecord();
+			JSObject globalObject = ((ObjectEnvironmentRecord) env).getBindingObject();
+			Object identifierProperty = globalObject.getProperty(context, identifier, false);
+			int value = (int) (long) ((PropertyDescriptor) identifierProperty).getValue();
 			BracketExpression.MultidimensionArrayIndexs.addFirst(value);
 		} else {
 			BracketExpression.MultidimensionArrayIndexs.addFirst((int)((IntegerNumberExpression) exp).getValue());
@@ -72,8 +75,7 @@ public class BracketExpression extends AbstractBinaryExpression {
     public void accept(ExecutionContext context, CodeVisitor visitor, boolean strict) {
         if(this.getLhs() instanceof BracketExpression) {
         	try{
-        	System.out.println("@" + BracketExpression.class.getSimpleName() + " Multidimension array detected");            
-            
+        	//System.out.println("@" + BracketExpression.class.getSimpleName() + " Multidimension array detected");            
             Expression lh = this.getLhs();
             BracketExpression be;
             
