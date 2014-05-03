@@ -81,12 +81,12 @@ public class DynObject implements JSObject, Map<String, Object> {
         // fita cola
         if( name.equals(String.valueOf(BracketExpression.MULTIDIM_ARR_FLAG)) ){
             Integer[] indxs = new Integer[BracketExpression.MultidimensionArrayIndexs.size()];//(Integer[])BracketExpression.MultidimensionArrayIndexs.toArray();
-            System.out.println("Multidimension array linearized Index access: " + BracketExpression.MultidimensionArrayIndexs);
+            //System.out.println("Multidimension array linearized Index access: " + BracketExpression.MultidimensionArrayIndexs);
             
             int indexCount = BracketExpression.MultidimensionArrayIndexs.size();
             for(int i = 0; i < indexCount; i++) {
                 indxs[i] = BracketExpression.MultidimensionArrayIndexs.pop();
-                System.out.println("Index: " + indxs[i]);
+                //System.out.println("Index: " + indxs[i]);
             }
             
             BracketExpression.MultidimensionArrayIndexs.clear();
@@ -182,12 +182,12 @@ public class DynObject implements JSObject, Map<String, Object> {
         if( name.equals(String.valueOf(BracketExpression.MULTIDIM_ARR_FLAG)) ){
             try {
             Integer[] indxs = new Integer[BracketExpression.MultidimensionArrayIndexs.size()]; // (Integer[])BracketExpression.MultidimensionArrayIndexs.toArray();
-            System.out.println("Multidimension array linearized Index access: " + BracketExpression.MultidimensionArrayIndexs);
+            //System.out.println("Multidimension array linearized Index access: " + BracketExpression.MultidimensionArrayIndexs);
             
             int indexCount = BracketExpression.MultidimensionArrayIndexs.size();
             for(int i = 0; i < indexCount; i++) {
                 indxs[i] = BracketExpression.MultidimensionArrayIndexs.pop();
-                System.out.println("Index: " + indxs[i]);
+                //System.out.println("Index: " + indxs[i]);
             }
             
             BracketExpression.MultidimensionArrayIndexs.clear();
